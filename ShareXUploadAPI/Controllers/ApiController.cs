@@ -39,6 +39,8 @@ namespace ShareXUploadAPI.Controllers
 
             if (apiKey != realKey)
             {
+                Console.WriteLine($"Real API Key: {realKey?.ToString()}");
+                Console.WriteLine($"Provided API Key: {apiKey.ToString()}");
                 return "Invalid or no API Key provided (x-api-key header)";
             }
 
