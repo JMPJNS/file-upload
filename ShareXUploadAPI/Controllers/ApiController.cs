@@ -68,7 +68,7 @@ namespace ShareXUploadAPI.Controllers
 
             var filename = new DateTimeOffset(DateTime.UtcNow).ToUnixTimeMilliseconds().ToString();
 
-            string path = Path.Combine("/drive/jonas/file/sx", $"{filename}.png");
+            string path = Path.Combine("/drive/jonas/files/sx", $"{filename}.png");
             
             await System.IO.File.WriteAllBytesAsync(path, content);
             
