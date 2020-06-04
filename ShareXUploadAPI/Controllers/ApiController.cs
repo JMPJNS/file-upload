@@ -29,7 +29,7 @@ namespace ShareXUploadAPI.Controllers
 
             var apiKey = re.Headers.FirstOrDefault(x => x.Key == "x-api-key").Value;
 
-            var realKey = Environment.GetEnvironmentVariable("api-key");
+            var realKey = Environment.GetEnvironmentVariable("APIKEY");
 
             if (apiKey != realKey)
             {
