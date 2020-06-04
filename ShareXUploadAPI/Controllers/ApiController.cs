@@ -69,7 +69,7 @@ namespace ShareXUploadAPI.Controllers
 
             var filename = new DateTimeOffset(DateTime.UtcNow).ToUnixTimeMilliseconds().ToString();
 
-            string path = Path.Combine("", $"{filename}");
+            string path = Path.Combine(storagePath, $"{filename}");
             
             await System.IO.File.WriteAllBytesAsync(path, content);
             
