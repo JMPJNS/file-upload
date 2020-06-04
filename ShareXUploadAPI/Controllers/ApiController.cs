@@ -33,21 +33,22 @@ namespace ShareXUploadAPI.Controllers
         {
             var re = Request;
 
-            Console.WriteLine("Headers:\n");
-            foreach (var header in re.Headers)
-            {
-                Console.WriteLine($"\t{header.Key}: {header.Value.ToString()}");
-            }
+            // Console.WriteLine("Headers:\n");
+            // foreach (var header in re.Headers)
+            // {
+            //     Console.WriteLine($"\t{header.Key}: {header.Value.ToString()}");
+            // }
             
             Console.WriteLine("\n\n");
             var apiKey = re.Headers.FirstOrDefault(x => x.Key.ToLower() == "x-api-key").Value;
 
             var realKey = Environment.GetEnvironmentVariable("APIKEY");
 
+            var storagePath = Environment.GetEnvironmentVariable("STORAGEPATH");
+            var url = Environment.GetEnvironmentVariable("URL");
+
             if (apiKey.ToString() != realKey)
             {
-                Console.WriteLine($"Real API Key: {realKey?.ToString()}");
-                Console.WriteLine($"Provided API Key: {apiKey.ToString()}");
                 return "Invalid or no API Key provided (x-api-key header)";
             }
 
@@ -68,11 +69,11 @@ namespace ShareXUploadAPI.Controllers
 
             var filename = new DateTimeOffset(DateTime.UtcNow).ToUnixTimeMilliseconds().ToString();
 
-            string path = Path.Combine("/drive/jonas/files/sx", $"{filename}.png");
+            string path = Path.Combine("", $"{filename}");
             
             await System.IO.File.WriteAllBytesAsync(path, content);
             
-            return $"https://files.jmp.blue/sx/{filename}.png";
+            return $"{url}/{filename}";
         }
         
     }
