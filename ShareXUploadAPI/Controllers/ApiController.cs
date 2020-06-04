@@ -22,6 +22,12 @@ namespace ShareXUploadAPI.Controllers
             _logger = logger;
         }
 
+        [HttpGet]
+        public string Get()
+        {
+            return "File Upload API";
+        }
+
         [HttpPost]
         public async Task<string> UploadImage()
         {
