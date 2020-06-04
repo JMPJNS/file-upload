@@ -33,6 +33,13 @@ namespace ShareXUploadAPI.Controllers
         {
             var re = Request;
 
+            Console.WriteLine("Headers:\n");
+            foreach (var header in re.Headers)
+            {
+                Console.WriteLine($"\t{header.Key}: {header.Value.ToString()}");
+            }
+            
+            Console.WriteLine("\n\n");
             var apiKey = re.Headers.FirstOrDefault(x => x.Key == "x-api-key").Value;
 
             var realKey = Environment.GetEnvironmentVariable("APIKEY");
