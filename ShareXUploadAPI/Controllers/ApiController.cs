@@ -40,11 +40,11 @@ namespace ShareXUploadAPI.Controllers
             }
             
             Console.WriteLine("\n\n");
-            var apiKey = re.Headers.FirstOrDefault(x => x.Key == "x-api-key").Value;
+            var apiKey = re.Headers.FirstOrDefault(x => x.Key.ToLower() == "x-api-key").Value;
 
             var realKey = Environment.GetEnvironmentVariable("APIKEY");
 
-            if (apiKey != realKey)
+            if (apiKey.ToString() != realKey)
             {
                 Console.WriteLine($"Real API Key: {realKey?.ToString()}");
                 Console.WriteLine($"Provided API Key: {apiKey.ToString()}");
