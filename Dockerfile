@@ -9,7 +9,7 @@ RUN dotnet restore
 # copy everything else and build app
 COPY ShareXUploadAPI/. ./ShareXUploadAPI/
 WORKDIR /app/ShareXUploadAPI
-RUN dotnet publish -c Release -o out
+RUN dotnet publish -c Debug -o out
 
 FROM mcr.microsoft.com/dotnet/core/aspnet:3.1 AS runtime
 WORKDIR /app
