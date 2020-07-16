@@ -43,6 +43,7 @@ namespace ShareXUploadAPI.Controllers
         [HttpPost]
         public async Task<string> UploadImage()
         {
+            return "no";
             var re = Request;
             var apiKey = re.Headers.FirstOrDefault(x => x.Key.ToLower() == "x-api-key").Value;
 
