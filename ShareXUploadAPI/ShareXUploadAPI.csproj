@@ -8,5 +8,11 @@
       <PackageReference Include="MimeTypesMap" Version="1.0.8" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Content Include="..\Dockerfile">
+        <Link>Dockerfile</Link>
+      </Content>
+    </ItemGroup>
+
 
 </Project>
