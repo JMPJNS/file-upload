@@ -25,7 +25,7 @@
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
         "STORAGEPATH": ".\\files",
-        "URL": "localhost:5000",
+        "URL": "http://localhost:5000",
         "APIKEY": "secret",
         "TMPPATH": ".\\tmp"
       }

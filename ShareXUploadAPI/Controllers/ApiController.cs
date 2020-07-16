@@ -70,43 +70,31 @@ namespace ShareXUploadAPI.Controllers
             if (section.GetContentDispositionHeader() != null)
             {
                 var fileSection = section.AsFileSection();
-                string filename = fileSection.FileName;
-                
-                var timestamp = new DateTimeOffset(DateTime.UtcNow).ToUnixTimeMilliseconds().ToString();
-                
-                var tempFile = Path.Combine(_tmpPath, $"{timestamp}{filename}");
+
                 var contentType = section.ContentType;
 
-                // await using var stream = new FileStream(tempFile, FileMode.OpenOrCreate);
-                //
-                // await fileSection.FileStream.CopyToAsync(stream);
-                // var size = Convert.ToInt32(stream.Length);
-
+                // Generate random filename
                 string hash;
-
                 using (var md5 = MD5.Create())
                 {
-                    hash = BitConverter.ToString(md5.ComputeHash(Encoding.ASCII.GetBytes(filename))).Replace("-","").ToLower();
+                    hash = BitConverter.ToString(md5.ComputeHash(Encoding.ASCII.GetBytes(fileSection.FileName))).Replace("-","").ToLower();
                 }
                 
-
-                filename = _generateFilename();
-
+                var timestamp = new DateTimeOffset(DateTime.UtcNow).ToUnixTimeMilliseconds().ToString();
+                var filename = _generateFilename();
                 filename += timestamp.Substring(timestamp.Length - 2);
                 filename += hash.Substring(0, 2);
-            
                 var extension = MimeTypesMap.GetExtension(contentType);
                 filename += $".{extension}";
 
+                
                 string path = Path.Combine(_storagePath, $"{filename}");
-            
                 using (var fileStream = new FileStream(path, FileMode.Create, FileAccess.Write))
                 {
                     fileSection.FileStream.Position = 0;
                     await fileSection.FileStream.CopyToAsync(fileStream);
                 }
                 
-                System.IO.File.Delete(tempFile);
                 
                 return $"{_url}/{filename}";
             }
