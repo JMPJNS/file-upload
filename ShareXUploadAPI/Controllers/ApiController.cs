@@ -120,7 +120,7 @@ namespace ShareXUploadAPI.Controllers
         }
 
         [HttpGet]
-        [Route("/{name}")]
+        [Route("/{*name}")]
         public async Task<IActionResult> DownloadImage()
         {
             var re = Request;
