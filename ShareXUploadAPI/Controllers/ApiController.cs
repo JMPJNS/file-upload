@@ -129,6 +129,12 @@ namespace ShareXUploadAPI.Controllers
             {
                 throw new ArgumentException("Filename cannot be empty");
             }
+
+            if (filename.Contains("..") || filename.Contains("~") || filename.StartsWith("/"))
+            {
+                throw new ArgumentException("Illegal Filename");
+            }
+            
             string path = Path.Combine(_storagePath, $"{filename}");
             try
             {
