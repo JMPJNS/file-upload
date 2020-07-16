@@ -9,7 +9,9 @@ using System.Text;
 using System.Threading.Tasks;
 using HeyRed.Mime;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Logging;
 
 namespace ShareXUploadAPI.Controllers
@@ -52,41 +54,54 @@ namespace ShareXUploadAPI.Controllers
                 throw new ArgumentException("Invalid or no API Key provided (x-api-key header)");
             }
 
-            if (re.Form.Files.Count == 0)
-            {
-                throw new ArgumentException( "No File in Form Body");
-            } 
+            var boundary = Request.GetMultipartBoundary();
             
-            IFormFile file = re.Form.Files.First();
-
-            byte[] content;
-            string hash;
-            using (var ms = new MemoryStream())
+            var reader = new MultipartReader(boundary, Request.Body);
+            var section = await reader.ReadNextSectionAsync();
+            
+            if (section.GetContentDispositionHeader() != null)
             {
-                await file.CopyToAsync(ms);
-                content = ms.ToArray();
+                var fileSection = section.AsFileSection();
+                var filename = fileSection.FileName;
+                var contentType = section.ContentType;
+                await using var stream = new FileStream(filename, FileMode.OpenOrCreate);
+                
+                await fileSection.FileStream.CopyToAsync(stream);
+                var size = Convert.ToInt32(stream.Length);
+
+                string hash;
+
+                using (var md5 = MD5.Create())
+                {
+                    hash = BitConverter.ToString(md5.ComputeHash(Encoding.ASCII.GetBytes(filename))).Replace("-","").ToLower();
+                }
+            
+                var timestamp = new DateTimeOffset(DateTime.UtcNow).ToUnixTimeMilliseconds().ToString();
+
+                filename = _generateFilename();
+
+                filename += timestamp.Substring(timestamp.Length - 2);
+                filename += hash.Substring(0, 2);
+            
+                var extension = MimeTypesMap.GetExtension(contentType);
+                filename += $".{extension}";
+
+                string path = Path.Combine(_storagePath, $"{filename}");
+            
+                using (var fileStream = new FileStream(path, FileMode.Create, FileAccess.Write))
+                {
+                    stream.Position = 0;
+                    await stream.CopyToAsync(fileStream);
+                }
+
+                return $"{_url}/{filename}";
+
+            }
+            else
+            {
+                throw new ArgumentException("No Content-Disposition header");
             }
 
-            using (var md5 = MD5.Create())
-            {
-                hash = BitConverter.ToString(md5.ComputeHash(content)).Replace("-","").ToLower();
-            }
-            
-            var timestamp = new DateTimeOffset(DateTime.UtcNow).ToUnixTimeMilliseconds().ToString();
-
-            string filename = _generateFilename();
-
-            filename += timestamp.Substring(timestamp.Length - 2);
-            filename += hash.Substring(0, 2);
-            
-            var extension = MimeTypesMap.GetExtension(file.ContentType);
-            filename += $".{extension}";
-
-            string path = Path.Combine(_storagePath, $"{filename}");
-            
-            await System.IO.File.WriteAllBytesAsync(path, content);
-            
-            return $"{_url}/{filename}";
         }
 
         private Random _random = new Random();
