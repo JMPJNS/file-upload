@@ -3,7 +3,7 @@ FROM mcr.microsoft.com/dotnet/core/sdk:3.1 AS build-env
 WORKDIR /app
 
 COPY *.sln .
-COPY ShareXUploadAPI/*.csproj ./
+COPY ShareXUploadAPI/*.csproj ShareXUploadAPI/
 
 RUN dotnet restore
 
