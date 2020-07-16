@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Security.Cryptography;
+using System.Text;
 using System.Threading.Tasks;
 using HeyRed.Mime;
 using Microsoft.AspNetCore.Http;
@@ -104,10 +105,10 @@ namespace ShareXUploadAPI.Controllers
         
         [HttpGet]
         [Route("/{name}")]
-        public async Task<byte[]> DownloadImage()
+        public async Task<IActionResult> DownloadImage()
         {
             var re = Request;
-            var filename = re.RouteValues["name"];
+            var filename = re.RouteValues["name"].ToString();
             if (filename == null)
             {
                 throw new ArgumentException("Filename cannot be empty");
@@ -115,14 +116,23 @@ namespace ShareXUploadAPI.Controllers
             string path = Path.Combine(_storagePath, $"{filename}");
             try
             {
-                var content = await System.IO.File.ReadAllBytesAsync(path);
-
-                if (content == null)
+                var content = System.IO.File.Open(path, FileMode.Open);
+                var extension = Path.GetExtension(path);
+                var mimeType = MimeTypesMap.GetMimeType(extension);
+                
+                System.Net.Mime.ContentDisposition cd = new System.Net.Mime.ContentDisposition
                 {
-                    throw new IOException("File not Found");
-                }
+                    Inline = true
+                };
+                Response.Headers.Add("Content-Disposition", cd.ToString());
+                Response.Headers.Add("X-Content-Type-Options", "nosniff");
 
-                return content;
+                return File(content, mimeType);
+                
+                // return new FileStreamResult(content, mimeType)
+                // {
+                //     FileDownloadName = filename
+                // };
             }
             catch (FileNotFoundException e)
             {
