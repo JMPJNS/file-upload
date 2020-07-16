@@ -97,6 +97,12 @@ namespace ShareXUploadAPI.Controllers
         }
 
         [HttpGet]
+        public async Task<string> Get()
+        {
+            return "Upload Stuff";
+        }
+        
+        [HttpGet]
         [Route("/{name}")]
         public async Task<byte[]> DownloadImage()
         {
