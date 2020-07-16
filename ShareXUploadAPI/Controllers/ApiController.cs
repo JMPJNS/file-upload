@@ -24,6 +24,7 @@ namespace ShareXUploadAPI.Controllers
         private readonly string _realKey;
         private readonly string _storagePath;
         private readonly string _url;
+        private readonly string _tmpPath;
 
         public ApiController(ILogger<ApiController> logger)
         {
@@ -32,12 +33,19 @@ namespace ShareXUploadAPI.Controllers
 
             var storagePath = Environment.GetEnvironmentVariable("STORAGEPATH");
             var url = Environment.GetEnvironmentVariable("URL");
+            var tmpPath = Environment.GetEnvironmentVariable("TMPPATH");
             
             if (storagePath == null || url == null)
             {
                 throw new Exception("Storage path or URL Env variable not set");
             }
 
+            if (tmpPath == null)
+            {
+                tmpPath = Path.GetTempPath();
+            }
+
+            _tmpPath = tmpPath;
             _realKey = realKey;
             _url = url;
             _storagePath = storagePath;
@@ -62,12 +70,17 @@ namespace ShareXUploadAPI.Controllers
             if (section.GetContentDispositionHeader() != null)
             {
                 var fileSection = section.AsFileSection();
-                var filename = fileSection.FileName;
-                var contentType = section.ContentType;
-                await using var stream = new FileStream(filename, FileMode.OpenOrCreate);
+                string filename = fileSection.FileName;
                 
-                await fileSection.FileStream.CopyToAsync(stream);
-                var size = Convert.ToInt32(stream.Length);
+                var timestamp = new DateTimeOffset(DateTime.UtcNow).ToUnixTimeMilliseconds().ToString();
+                
+                var tempFile = Path.Combine(_tmpPath, $"{timestamp}{filename}");
+                var contentType = section.ContentType;
+
+                // await using var stream = new FileStream(tempFile, FileMode.OpenOrCreate);
+                //
+                // await fileSection.FileStream.CopyToAsync(stream);
+                // var size = Convert.ToInt32(stream.Length);
 
                 string hash;
 
@@ -75,8 +88,7 @@ namespace ShareXUploadAPI.Controllers
                 {
                     hash = BitConverter.ToString(md5.ComputeHash(Encoding.ASCII.GetBytes(filename))).Replace("-","").ToLower();
                 }
-            
-                var timestamp = new DateTimeOffset(DateTime.UtcNow).ToUnixTimeMilliseconds().ToString();
+                
 
                 filename = _generateFilename();
 
@@ -90,12 +102,13 @@ namespace ShareXUploadAPI.Controllers
             
                 using (var fileStream = new FileStream(path, FileMode.Create, FileAccess.Write))
                 {
-                    stream.Position = 0;
-                    await stream.CopyToAsync(fileStream);
+                    fileSection.FileStream.Position = 0;
+                    await fileSection.FileStream.CopyToAsync(fileStream);
                 }
-
+                
+                System.IO.File.Delete(tempFile);
+                
                 return $"{_url}/{filename}";
-
             }
             else
             {
@@ -117,7 +130,7 @@ namespace ShareXUploadAPI.Controllers
         {
             return "Upload Stuff";
         }
-        
+
         [HttpGet]
         [Route("/{name}")]
         public async Task<IActionResult> DownloadImage()
@@ -143,11 +156,6 @@ namespace ShareXUploadAPI.Controllers
                 Response.Headers.Add("X-Content-Type-Options", "nosniff");
 
                 return File(content, mimeType);
-                
-                // return new FileStreamResult(content, mimeType)
-                // {
-                //     FileDownloadName = filename
-                // };
             }
             catch (FileNotFoundException e)
             {

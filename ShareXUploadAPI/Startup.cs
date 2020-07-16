@@ -33,7 +33,7 @@ namespace ShareXUploadAPI
             
             services.Configure<KestrelServerOptions>(options =>
             {
-                options.Limits.MaxRequestBodySize = int.MaxValue; // if don't set default value is: 30 MB
+                options.Limits.MaxRequestBodySize = 250000000; // if don't set default value is: 30 MB
             });
             
         }
