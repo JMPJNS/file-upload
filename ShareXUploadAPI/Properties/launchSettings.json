@@ -26,7 +26,7 @@
         "ASPNETCORE_ENVIRONMENT": "Development",
         "STORAGEPATH": ".\\files",
         "URL": "http://localhost:5000",
-        "APIKEY": "secret",
+        "APIKEY": "SuperSecret",
         "TMPPATH": ".\\tmp"
       }
     }

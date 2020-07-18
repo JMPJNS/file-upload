@@ -11,6 +11,8 @@ using HeyRed.Mime;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Razor;
+using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Logging;
 
@@ -114,20 +116,51 @@ namespace ShareXUploadAPI.Controllers
         }
 
         [HttpGet]
-        public async Task<string> Get()
+        public async Task<ContentResult> Get()
         {
-            return "Upload Stuff";
+            var r = @$"
+                <!DOCTYPE html>
+                <html>
+                    <title>Test</title>
+                    <body>
+                        <h1>Test</h1>
+                        <h2>Test2</h2>
+                    </body>
+                </html> 
+            ";
+            
+            return new ContentResult
+            {
+                ContentType = "text/html",
+                Content = r
+            };
         }
 
         [HttpGet]
-        [Route("/{*name}")]
+        [Route("/{folder}/{name?}")]
         public async Task<IActionResult> DownloadImage()
         {
             var re = Request;
-            var filename = re.RouteValues["name"].ToString();
-            if (filename == null)
+
+            string filename;
+
+            var folderValue = re.RouteValues["folder"];
+            var filenameValue = re.RouteValues["name"];
+            
+            if (filenameValue == null)
             {
-                throw new ArgumentException("Filename cannot be empty");
+                if (folderValue != null)
+                {
+                    filename = folderValue.ToString();
+                }
+                else
+                {
+                    throw new ArgumentException("Filename cannot be empty");
+                }
+            }
+            else
+            {
+                filename = folderValue.ToString() + "/" + filenameValue.ToString();
             }
 
             if (filename.Contains("..") || filename.Contains("~") || filename.StartsWith("/"))
@@ -153,6 +186,7 @@ namespace ShareXUploadAPI.Controllers
             }
             catch (FileNotFoundException e)
             {
+                Response.StatusCode = 404;
                 throw new FileNotFoundException($"File {filename} not found");
             }
         }
