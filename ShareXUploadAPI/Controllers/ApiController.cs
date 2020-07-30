@@ -121,10 +121,9 @@ namespace ShareXUploadAPI.Controllers
             var r = @$"
                 <!DOCTYPE html>
                 <html>
-                    <title>Test</title>
+                    <title>Wannabe CDN</title>
                     <body>
-                        <h1>Test</h1>
-                        <h2>Test2</h2>
+                        <a href='https://github.com/JMPJNS/file-upload'>Source Code Here</a>
                     </body>
                 </html> 
             ";
