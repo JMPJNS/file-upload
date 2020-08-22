@@ -15,6 +15,9 @@
       <Content Include="..\Dockerfile">
         <Link>Dockerfile</Link>
       </Content>
+      <Content Include="..\NOTICE">
+        <Link>NOTICE</Link>
+      </Content>
     </ItemGroup>
 
 
