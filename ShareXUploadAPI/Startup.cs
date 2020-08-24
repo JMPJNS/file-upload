@@ -37,6 +37,8 @@ namespace ShareXUploadAPI
             services.AddControllers();
             services.AddRazorPages();
         }
+        
+        private static Random _random = new Random();
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
@@ -61,6 +63,18 @@ namespace ShareXUploadAPI
                         {
                             context.Response.StatusCode = 404;
 
+                            string[] notFoundImages =
+                            {
+                                "https://cdn.jmp.blue/1OYM24bc.png",
+                                "https://cdn.jmp.blue/IYUO1053.png",
+                                "https://cdn.jmp.blue/L8JE6311.png",
+                                "https://cdn.jmp.blue/VT6246b2.png",
+                                "https://cdn.jmp.blue/YNBF0664.png",
+                                "https://cdn.jmp.blue/8XWS61b0.png"
+                            };
+                            
+                            var index = _random.Next(0, notFoundImages.Length);
+
                             var sendText = "<html lang='en'>"+
                                             "<head><style>"+
                                             "h1 {text-align: center;}"+
@@ -69,7 +83,7 @@ namespace ShareXUploadAPI
                                             "img {text-align: center; display: block; margin-left: auto; margin-right: auto;}"+
                                             "</style></head>"+
                                             "<body>"+
-                                            "<img src='https://cdn.jmp.blue/1OYM24bc.png'/>"+
+                                            $"<img src='{notFoundImages[index]}'/>"+
                                             $"<p>{exceptionHandlerPathFeature?.Error.Message}</p>"+
                                             "</body></html>";
 
