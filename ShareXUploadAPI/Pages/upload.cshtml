@@ -1,0 +1,34 @@
+@page
+<title>Wannabe CDN</title>
+
+<body>
+    <div id="par">
+        <input id='upload' type='file'></input>
+        <button onclick='uploadFile()'>Submit</button>
+    </div>
+</body>
+
+<script>
+    const input = document.getElementById('upload');
+    const par = document.getElementById('par');
+    async function uploadFile() {
+        const data = new FormData();
+        data.append(`${new Date().toISOString()}-${input.files[0].name}`, input.files[0]);
+
+        await fetch('/', {
+            method: 'POST',
+            body: data,
+            headers: {
+                "x-api-key": "SuperSecret"
+            }
+        });
+
+        const p = document.createElement("p");
+        const node = document.createTextNode("Uploaded.");
+        p.appendChild(node);
+
+        par.appendChild(p);
+
+        setTimeout(() => { par.removeChild(p) }, 3000);
+    }
+</script>

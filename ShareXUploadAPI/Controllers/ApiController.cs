@@ -68,8 +68,9 @@ namespace ShareXUploadAPI.Controllers
             
             var reader = new MultipartReader(boundary, Request.Body);
             var section = await reader.ReadNextSectionAsync();
+            var disposition = section.GetContentDispositionHeader();
             
-            if (section.GetContentDispositionHeader() != null)
+            if (disposition != null)
             {
                 var fileSection = section.AsFileSection();
 
@@ -83,7 +84,7 @@ namespace ShareXUploadAPI.Controllers
                 }
                 
                 var timestamp = new DateTimeOffset(DateTime.UtcNow).ToUnixTimeMilliseconds().ToString();
-                var filename = _generateFilename();
+                var filename = _generateFilename(disposition.FileName.ToString());
                 filename += timestamp.Substring(timestamp.Length - 2);
                 filename += hash.Substring(0, 2);
                 var extension = MimeTypesMap.GetExtension(contentType);
@@ -108,11 +109,21 @@ namespace ShareXUploadAPI.Controllers
         }
 
         private Random _random = new Random();
-        private string _generateFilename()
+        private string _generateFilename(string existing)
         {
+            var s = "";
+            if (existing != null) {
+                var split = existing.Split(".").ToList();
+                try {
+                    split.RemoveAt(split.Count - 1);
+                } catch (ArgumentOutOfRangeException) {}
+                s += string.Join('.', split);
+            }
             const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-            return new string(Enumerable.Repeat(chars, 4)
+            s += new string(Enumerable.Repeat(chars, 4)
                 .Select(s => s[_random.Next(s.Length)]).ToArray());
+
+            return s;
         }
 
         [HttpGet]
@@ -123,7 +134,12 @@ namespace ShareXUploadAPI.Controllers
                 <html>
                     <title>Wannabe CDN</title>
                     <body>
+                    <div>
                         <a href='https://github.com/JMPJNS/file-upload'>Source Code Here</a>
+                    </div>
+                    <div>
+                        <a href='/upload'>Upload Files</a>
+                    </div>
                     </body>
                 </html> 
             ";
