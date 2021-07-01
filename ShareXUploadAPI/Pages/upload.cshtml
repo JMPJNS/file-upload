@@ -2,10 +2,11 @@
 <title>Wannabe CDN</title>
 
 <body>
-    <div id="par">
+    <div>
         <input id='upload' type='file'></input>
         <button onclick='uploadFile()'>Submit</button>
     </div>
+    <div id="par"></div>
 </body>
 
 <script>
@@ -15,7 +16,7 @@
         const data = new FormData();
         data.append(`${new Date().toISOString()}-${input.files[0].name}`, input.files[0]);
 
-        await fetch('/', {
+        const up = await fetch('/', {
             method: 'POST',
             body: data,
             headers: {
@@ -23,12 +24,13 @@
             }
         });
 
-        const p = document.createElement("p");
-        const node = document.createTextNode("Uploaded.");
-        p.appendChild(node);
+        const url = await up.text();
 
-        par.appendChild(p);
-
-        setTimeout(() => { par.removeChild(p) }, 3000);
+        const a = document.createElement("a");
+        const node = document.createTextNode(url);
+        a.appendChild(node);
+        a.href = url;
+        a.title = url;
+        par.appendChild(a);
     }
 </script>
